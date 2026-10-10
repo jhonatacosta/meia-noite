@@ -1,5 +1,5 @@
-// Gera a narração em português do Brasil (MP3) a partir dos textos do jogo,
-// usando Piper (TTS neural offline, código aberto).
+// Gera as falas do jogo em português do Brasil (MP3) usando Piper,
+// um TTS neural offline e de código aberto.
 //
 // Preparação (uma vez):
 //   pip install piper-tts lameenc
@@ -13,8 +13,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { DESCOBERTAS, FINAL } from '../lib/caso.js';
-import { INTRO, VOZ_NARRADOR, VOZ_ANCORA, textoNoticia } from '../lib/narracao.js';
+import { todasAsFalas, VOZ_NARRADOR, VOZ_ANCORA } from '../lib/narracao.js';
 
 const OUT = 'public/audio';
 const VOZES = process.env.PIPER_VOZES || 'vozes';
@@ -29,16 +28,11 @@ for (const v of [VOZ_NARRADOR, VOZ_ANCORA]) {
 }
 mkdirSync(OUT, { recursive: true });
 
-const noticia = (id, news) => ({ id: 'news-' + id, texto: textoNoticia(news), voz: VOZ_ANCORA, lento: 0.95 });
-const jobs = [
-  ...INTRO.map(n => ({ id: n.id, texto: n.texto, voz: VOZ_NARRADOR, lento: 1.15 })),
-  ...DESCOBERTAS.map(d => noticia(d.id, d.news)),
-  ...Object.values(FINAL.noticias).map(n => noticia(n.id, n.news)),
-]
+const jobs = todasAsFalas()
   .map(j => ({ ...j, arquivo: `${OUT}/${j.id}.mp3` }))
   .filter(j => todos || !existsSync(j.arquivo));
 
 if (!jobs.length) { console.log('Todos os áudios já existem. Use --todos para regravar.'); process.exit(0); }
-const tmp = join(tmpdir(), 'ultimo-lance-jobs.json');
+const tmp = join(tmpdir(), 'meia-noite-falas.json');
 writeFileSync(tmp, JSON.stringify(jobs), 'utf-8');
 execFileSync(py, ['scripts/piper_mp3.py', tmp, VOZES], { stdio: 'inherit' });

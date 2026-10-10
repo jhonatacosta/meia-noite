@@ -1,5 +1,6 @@
 import { Anton, IBM_Plex_Sans, IBM_Plex_Mono, Playfair_Display, Special_Elite, Caveat } from 'next/font/google';
 import './globals.css';
+import './meianoite.css';
 
 const display = Anton({ weight: '400', subsets: ['latin'], variable: '--f-display' });
 const sans = IBM_Plex_Sans({ weight: ['400', '600', '700'], subsets: ['latin'], variable: '--f-sans' });
@@ -9,8 +10,8 @@ const typed = Special_Elite({ weight: '400', subsets: ['latin'], variable: '--f-
 const hand = Caveat({ weight: ['600'], subsets: ['latin'], variable: '--f-hand' });
 
 export const metadata = {
-  title: 'Último Lance',
-  description: 'Jogo de investigação criminal cooperativo para dois celulares.',
+  title: 'Meia-Noite',
+  description: 'Um sequestro, sessenta minutos e dois celulares: jogo de investigação cooperativo.',
 };
 
 export const viewport = {

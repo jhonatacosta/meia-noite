@@ -117,14 +117,14 @@ h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
 .role-card b { font-size: 20px; }
 .role-card span:last-child { color: var(--dim); }
 .role-card::after { content: ''; position: absolute; right: -30px; top: 0; bottom: 0; width: 70px; background: repeating-linear-gradient(-45deg, var(--accent) 0 10px, transparent 10px 20px); opacity: .5; }
-.rc-perito { --accent: var(--tape); }
-.rc-analista { --accent: var(--teal); }
+.rc-campo { --accent: var(--tape); }
+.rc-central { --accent: var(--teal); }
 .rc-tag { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--accent); }
 
 /* ---------- app ---------- */
 .app { max-width: 560px; margin: 0 auto; min-height: 100%; }
-.role-perito { --accent: var(--tape); }
-.role-analista { --accent: var(--teal); }
+.role-campo { --accent: var(--tape); }
+.role-central { --accent: var(--teal); }
 .top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px; background: rgba(12,14,17,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .top-role { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; color: var(--accent); display: flex; align-items: center; gap: 6px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }

@@ -1,64 +1,92 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import * as A from '@/lib/audio';
-import { MANSAO, TACA, avatar } from '@/lib/svg';
-import { SUSPEITOS } from '@/lib/caso';
 import { INTRO } from '@/lib/narracao';
 
 const SCENES = INTRO;
 
-function TypeText({ text, speed = 55 }) {
+function TypeText({ text, speed = 55, sound = true }) {
   const [n, setN] = useState(0);
   useEffect(() => {
     if (n >= text.length) return;
-    const t = setTimeout(() => { setN(n + 1); if (text[n] !== ' ') A.typeTick(); }, speed);
+    const t = setTimeout(() => { setN(n + 1); if (sound && text[n] !== ' ') A.typeTick(); }, speed);
     return () => clearTimeout(t);
-  }, [n, text, speed]);
+  }, [n, text, speed, sound]);
   return <span>{text.slice(0, n)}<span className="caret">▌</span></span>;
+}
+
+function Contagem() {
+  const [s, setS] = useState(3600);
+  useEffect(() => {
+    const iv = setInterval(() => setS(v => { if (v <= 3540) { clearInterval(iv); return v; } A.tick(); return v - 1; }), 80);
+    return () => clearInterval(iv);
+  }, []);
+  const mm = String(Math.floor(s / 60)).padStart(2, '0'), ss = String(s % 60).padStart(2, '0');
+  return <div className="clock-big">{mm}:{ss}</div>;
+}
+
+export function Telefone({ estado, segundos = 0 }) {
+  return (
+    <div className={`phone ${estado}`}>
+      <div className="phone-notch" />
+      <div className="phone-who">{estado === 'tocando' ? 'Chamada recebida' : 'Em chamada'}</div>
+      <div className="phone-num">Número desconhecido</div>
+      <div className="phone-sub">celular de Débora Kfouri</div>
+      {estado === 'falando'
+        ? <div className="wave">{Array.from({ length: 24 }).map((_, i) => <i key={i} style={{ animationDelay: `${(i % 6) * 0.09}s` }} />)}</div>
+        : <div className="phone-ring">📞</div>}
+      {estado === 'falando' && <div className="phone-time mono">00:{String(segundos).padStart(2, '0')}</div>}
+    </div>
+  );
 }
 
 export default function Intro({ onDone }) {
   const [started, setStarted] = useState(false);
   const [i, setI] = useState(-1);
   const [ended, setEnded] = useState(false);
+  const [seg, setSeg] = useState(0);
   const skip = useRef(false);
-  const stopDrone = useRef(() => {});
+  const stops = useRef([]);
 
   const wait = ms => new Promise(r => {
     const t0 = Date.now();
     const iv = setInterval(() => { if (skip.current || Date.now() - t0 >= ms) { clearInterval(iv); r(); } }, 100);
   });
+  const stopAll = () => { stops.current.forEach(f => f()); stops.current = []; };
 
-  function sfx(k) {
-    if (k === 'ecg') {
-      [0, 900, 1800].forEach(d => setTimeout(() => !skip.current && A.heartbeat(), d));
-      setTimeout(() => !skip.current && A.flatline(), 2700);
-    }
-    if (k === 'segredo') setTimeout(() => !skip.current && A.stamp(), 900);
-    if (k === 'suspeitos') SUSPEITOS.forEach((_, j) => setTimeout(() => !skip.current && A.whoosh(), 300 + j * 420));
-    if (k === 'titulo') setTimeout(() => !skip.current && A.newsSting(), 200);
-    if (k === 'mansao' || k === 'vitima') A.whoosh();
-  }
+  useEffect(() => {
+    if (SCENES[i]?.k !== 'ligacao') return;
+    setSeg(0);
+    const iv = setInterval(() => setSeg(s => s + 1), 1000);
+    return () => clearInterval(iv);
+  }, [i]);
 
   async function start() {
     A.unlockAudio();
     A.preload(SCENES.map(sc => sc.id));
     setStarted(true);
-    stopDrone.current = A.drone();
+    stops.current.push(A.drone());
     for (let n = 0; n < SCENES.length; n++) {
       if (skip.current) return;
+      const sc = SCENES[n];
       setI(n);
-      sfx(SCENES[n].k);
-      await Promise.all([A.playClip(SCENES[n].id, SCENES[n].texto), wait(SCENES[n].min)]);
+      let local = null;
+      if (sc.k === 'toque') local = A.ringtone();
+      if (sc.k === 'ligacao') { local = A.harbor(); A.click(); }
+      if (sc.k === 'titulo') A.newsSting();
+      if (sc.k === 'bia') A.stamp();
+      await Promise.all([A.playClip(sc.id, sc.texto, sc.fx), wait(sc.min)]);
+      if (local) local();
+      if (sc.k === 'ligacao') A.hangup();
     }
-    stopDrone.current();
+    stopAll();
     setEnded(true);
   }
 
   function finish() {
     skip.current = true;
     A.stopSpeech();
-    stopDrone.current();
+    stopAll();
     A.unlockAudio();
     onDone();
   }
@@ -67,13 +95,12 @@ export default function Intro({ onDone }) {
     return (
       <div className="intro intro-gate">
         <div className="gate-top">
-          <div className="eyebrow">DIF · Departamento de Investigações Federais</div>
-          <div className="gate-case">INQUÉRITO 0917/2026</div>
+          <div className="eyebrow">Um jogo para dois celulares</div>
+          <div className="gate-case">MEIA-NOITE</div>
+          <p className="gate-note">Um sequestro. Sessenta minutos. Um de vocês no campo, o outro na central.</p>
         </div>
-        <button className="gate-play" onClick={start} aria-label="Iniciar a apresentação do caso">
-          <span className="ring" /><span className="tri">▶</span>
-        </button>
-        <p className="gate-note">Aumente o volume. A abertura tem narração e trilha.</p>
+        <button className="gate-play" onClick={start} aria-label="Iniciar a apresentação do caso"><span className="ring" /><span className="tri">▶</span></button>
+        <p className="gate-note">Aumentem o volume. Joguem juntos, na mesma sala.</p>
         <button className="link" onClick={finish}>Pular abertura</button>
       </div>
     );
@@ -81,46 +108,41 @@ export default function Intro({ onDone }) {
 
   const sc = SCENES[i] || SCENES[SCENES.length - 1];
   return (
-    <div className="intro">
+    <div className={`intro sc-${sc.k}`}>
       <div className="grain" />
       <div className="scene" key={sc.k}>
         {sc.k === 'data' && (
-          <div className="sc-data"><div className="mono big"><TypeText text="GUARUJÁ · SP" /></div>
-            <div className="mono"><TypeText text="SÁBADO, 12 DE SETEMBRO · 22:47" speed={45} /></div></div>
+          <div className="sc-data"><div className="mono big"><TypeText text="SANTOS · SP" /></div>
+            <div className="mono"><TypeText text="SEXTA, 16 DE OUTUBRO · 23:00" speed={45} /></div></div>
         )}
-        {sc.k === 'mansao' && (
-          <div className="sc-mansao"><div className="mansao" dangerouslySetInnerHTML={{ __html: MANSAO }} />
-            <div className="cap">VILLA GAIVOTA <span>· Leilão “Noite das Marés”</span></div></div>
-        )}
-        {sc.k === 'vitima' && (
-          <div className="sc-vitima"><div className="taca" dangerouslySetInnerHTML={{ __html: TACA }} />
-            <div className="vit-card"><div className="eyebrow">A vítima</div><div className="vit-name">Augusto Valadares</div><div className="mono">63 anos · empresário do porto · cardiopata</div></div></div>
-        )}
-        {sc.k === 'ecg' && (
-          <div className="sc-ecg">
-            <svg viewBox="0 0 400 120" className="ecg"><path d="M0 60 L60 60 L75 60 L85 20 L95 100 L105 60 L160 60 L175 60 L185 25 L195 95 L205 60 L260 60 L272 50 L280 60 L400 60" /></svg>
-            <div className="time mono">23:38 · ÓBITO</div>
+        {sc.k === 'redacao' && (
+          <div className="monitor">
+            <div className="mon-bar"><span /><span /><span /> <b>PORTAL RADAR · editor</b></div>
+            <div className="mon-body">
+              <div className="mon-kicker">EXCLUSIVO</div>
+              <div className="mon-head"><TypeText text="O ESQUEMA ATLAS" speed={70} /></div>
+              <div className="mon-lines"><i /><i /><i /><i /></div>
+              <div className="mon-pub">PUBLICAÇÃO AGENDADA · 06:00</div>
+            </div>
           </div>
         )}
-        {sc.k === 'segredo' && (
-          <div className="sc-segredo"><div className="doc"><div className="mono">AGENDA · SEG 14/09</div><div className="hand">09h · DIF · Dr. Paiva<br />DEPOIMENTO</div></div><div className="stamp">CONFIDENCIAL</div></div>
+        {sc.k === 'bia' && (
+          <div className="bia-card">
+            <div className="bia-photo"><svg viewBox="0 0 100 120"><path d="M24 50 C20 16 80 16 76 50 L80 96 L20 96 Z" fill="#3a2a22" /><ellipse cx="50" cy="48" rx="20" ry="24" fill="#4a4f57" /><path d="M8 120 C10 92 28 80 50 80 C72 80 90 92 92 120 Z" fill="#2e7d4f" /><path d="M29 42 C33 20 67 20 71 42 C60 30 40 30 29 42Z" fill="#3a2a22" /></svg></div>
+            <div className="bia-t"><b>Beatriz Torres</b><span>31 anos · repórter investigativa</span><span className="mono">vista pela última vez: 19:52</span></div>
+            <div className="tape">DESAPARECIDA · DESAPARECIDA · DESAPARECIDA · DESAPARECIDA</div>
+          </div>
         )}
-        {sc.k === 'suspeitos' && (
-          <div className="sc-susp">{SUSPEITOS.map((s, j) => (
-            <div className="sp" key={s.id} style={{ animationDelay: `${0.3 + j * 0.42}s` }}>
-              <div className="sp-av" dangerouslySetInnerHTML={{ __html: avatar(s.hair) }} />
-              <div className="sp-n">{s.nome.replace('Dra. ', '').split(' ')[0]}</div>
-            </div>))}</div>
-        )}
+        {sc.k === 'toque' && <Telefone estado="tocando" />}
+        {sc.k === 'ligacao' && <Telefone estado="falando" segundos={seg} />}
+        {sc.k === 'relogio' && <div className="sc-relogio"><div className="mono small-up">TEMPO ATÉ O PRAZO</div><Contagem /></div>}
         {sc.k === 'titulo' && (
-          <div className="sc-titulo"><div className="eyebrow">Um caso para dois celulares</div><h1 className="logo">ÚLTIMO<br />LANCE</h1><div className="mono">O CASO VALADARES</div></div>
+          <div className="sc-titulo"><div className="eyebrow">Um caso para dois celulares</div><h1 className="logo">MEIA-<br />NOITE</h1><div className="mono">PERGUNTEM · RESPONDAM · CORRAM</div></div>
         )}
       </div>
-      <div className="subtitle">{sc.texto}</div>
+      <div className={`subtitle ${sc.fx === 'sequestrador' ? 'evil' : ''}`}>{sc.fx === 'sequestrador' && <b>Sequestrador: </b>}{sc.texto}</div>
       <div className="intro-actions">
-        {ended
-          ? <button className="btn primary" onClick={finish}>Começar a investigação</button>
-          : <button className="link" onClick={finish}>Pular</button>}
+        {ended ? <button className="btn primary" onClick={finish}>Escolher papéis</button> : <button className="link" onClick={finish}>Pular</button>}
       </div>
     </div>
   );

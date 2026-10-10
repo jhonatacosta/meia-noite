@@ -1,8 +1,8 @@
 {
-  "name": "ultimo-lance",
+  "name": "meia-noite",
   "version": "1.0.0",
   "private": true,
-  "description": "Jogo de investigação criminal cooperativo para dois celulares",
+  "description": "Jogo de investigação cooperativo para dois celulares: um sequestro, 60 minutos",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,5 +13,6 @@
     "next": "^15.5.27",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
-  }
+  },
+  "type": "module"
 }

@@ -1,19 +1,23 @@
-# Último Lance — O Caso Valadares
+# Meia-Noite
 
-Jogo de investigação criminal **cooperativo para dois celulares**, feito em Next.js. Roda 100% no navegador, sem nada para imprimir e sem servidor.
+Jogo de investigação **cooperativo para dois celulares**, feito em Next.js. Roda no navegador, sem nada para imprimir e sem servidor.
 
-Um empresário morre envenenado durante o leilão beneficente da própria mansão, dois dias antes de depor numa investigação federal. Seis suspeitos, todos mentem. Um deles tem voo para Lisboa.
+> Sexta-feira, 23h00. A repórter Bia Torres sumiu horas antes de publicar a reportagem que derruba um esquema de propina. O sequestrador liga: apaguem a matéria até meia-noite. Vocês têm **60 minutos reais**.
 
-## Como jogar
+## Como se joga
 
-1. Os dois jogadores abrem o mesmo link, cada um no seu celular.
-2. Assistam à abertura animada (com narração: aumentem o volume).
-3. Cada um escolhe um papel diferente:
-   - **Perito(a) Criminal**: cena do crime, câmeras, fotos e laboratório (créditos limitados).
-   - **Analista de Inteligência**: pessoas, veículos, telefones, contas, farmácias e arquivo secreto.
-4. Os **objetivos são os mesmos nos dois celulares**, mas as pistas estão espalhadas. Quem achar a resposta conta para o parceiro, e os dois digitam no próprio celular.
-5. Cada descoberta dispara um **plantão de jornal** animado e narrado, e libera material novo.
-6. São 3 atos e 11 descobertas. No fim, cada um entrega o relatório final. Se o **código do veredito** for igual nos dois celulares, vocês acusaram juntos.
+1. Os dois abrem o mesmo link, cada um no seu celular, na mesma sala.
+2. Assistam à abertura (com narração e a primeira ligação do sequestrador: aumentem o volume).
+3. Um escolhe **Agente de Campo** (está na redação: depoimentos, interrogatórios, provas e o celular da editora). O outro escolhe **Analista da Central** (câmeras da cidade, placas e GPS, telefones, cadastros, marina).
+4. Contem “três, dois, um” e apertem **INICIAR** juntos. O cronômetro começa.
+5. Cada passo aparece **num celular só**, como pergunta, e a resposta está nos arquivos do outro:
+   - quem tem a pergunta faz a pergunta em voz alta;
+   - o parceiro procura nos arquivos dele e responde;
+   - quem perguntou digita a resposta e recebe um **código de rádio** (ex.: `DELTA-52`);
+   - lê o código em voz alta, o parceiro digita, e os dois recebem o plantão ao mesmo tempo.
+6. Resposta errada custa **1 minuto**.
+7. No caminho: ligações do sequestrador (vocês escolhem o que responder), uma invasão a um armazém, um interrogatório ao vivo e plantões de jornal narrados.
+8. No fim, vocês dão a **Ordem de Resgate**. O final depende de onde mandarem as lanchas e de quanto tempo sobrou.
 
 O progresso fica salvo no navegador de cada celular. Para recomeçar, use o menu ⋮.
 
@@ -24,22 +28,20 @@ npm install
 npm run dev
 ```
 
-Abra http://localhost:3000. Para testar no celular na mesma rede Wi-Fi, use o IP do computador (ex.: `http://192.168.0.10:3000`).
+Abra http://localhost:3000. Para jogar nos celulares antes de publicar, use o IP do computador na mesma rede Wi-Fi (ex.: `http://192.168.0.10:3000`).
 
 ## Publicar
 
-**GitHub Pages (automático):** no repositório, vá em *Settings → Pages → Build and deployment → Source* e escolha **GitHub Actions**. Cada push na branch `main` publica o jogo em `https://<seu-usuario>.github.io/<nome-do-repositorio>/`.
+**GitHub Pages (automático):** em *Settings → Pages → Build and deployment → Source*, escolha **GitHub Actions**. Cada push na branch `main` publica em `https://<seu-usuario>.github.io/<nome-do-repositorio>/`.
 
-**Vercel:** importe o repositório em vercel.com. Não precisa configurar nada.
+**Vercel:** importe o repositório em vercel.com, sem configurar nada.
 
 ## Estrutura
 
-- `lib/caso.js` — todo o conteúdo do caso: suspeitos, depoimentos, provas, objetivos e manchetes. Para criar outro caso, edite este arquivo.
-- `lib/audio.js` — trilha e efeitos sintetizados (WebAudio) e reprodução da narração gravada.
-- `lib/narracao.js` + `public/audio/` — textos e MP3 da narração em português do Brasil (vozes neurais Piper: Faber na abertura, Cadu nos plantões). Funciona em qualquer celular, mesmo sem voz em português instalada.
-- `scripts/gerar-audio.mjs` — regrava os MP3 quando você muda algum texto (`npm run audio`; instruções no topo do arquivo).
-- `components/Intro.jsx` — abertura em motion design.
-- `components/NewsFlash.jsx` — plantão de jornal: flash, jornal girando, tarja de TV ao vivo e narração.
-- `components/Game.jsx` e `components/Panels.jsx` — o jogo.
+- `lib/caso.js`: todo o caso (passos, perguntas, códigos, arquivos de cada papel, ligações, operações, final).
+- `lib/narracao.js` + `public/audio/`: falas em português do Brasil, gravadas com vozes neurais Piper (Faber e Cadu). O sequestrador e o rádio da polícia recebem efeitos em tempo real.
+- `lib/audio.js`: efeitos e ambientes sintetizados (toque de celular, porto, motor, rádio, sirene).
+- `components/`: abertura (`Intro`), ligação (`CallScreen`), invasão e resgate (`Operacao`), plantão de jornal (`NewsFlash`), jogo (`Game`, `Panels`).
+- `scripts/gerar-audio.mjs`: regrava os MP3 quando um texto falado muda (`npm run audio`; instruções no topo do arquivo).
 
-Obra de ficção. Pessoas, empresas e o órgão “DIF” são inventados.
+Obra de ficção. Pessoas, empresas e órgãos são inventados.

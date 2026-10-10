@@ -19,7 +19,7 @@ export default function NewsFlash({ item, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const hoje = 'Segunda-feira, 14 de setembro de 2026';
+  const hoje = 'Sexta, 16 de outubro de 2026 · noite';
   return (
     <div className={`news news-${phase}`} role="dialog" aria-label={`Plantão: ${news.manchete}`}>
       <div className="news-flash"><span>PLANTÃO</span></div>
