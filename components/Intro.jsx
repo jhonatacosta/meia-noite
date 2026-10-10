@@ -3,16 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import * as A from '@/lib/audio';
 import { MANSAO, TACA, avatar } from '@/lib/svg';
 import { SUSPEITOS } from '@/lib/caso';
+import { INTRO } from '@/lib/narracao';
 
-const SCENES = [
-  { k: 'data', narr: 'Guarujá. Sábado, doze de setembro. Vinte e duas horas e quarenta e sete minutos.', min: 4200 },
-  { k: 'mansao', narr: 'Na Villa Gaivota, quarenta convidados disputam obras de arte num leilão beneficente.', min: 4600 },
-  { k: 'vitima', narr: 'O anfitrião, o empresário Augusto Valadares, pede um conhaque e se tranca no escritório.', min: 4800 },
-  { k: 'ecg', narr: 'Cinquenta minutos depois, ele está morto. Parece o coração.', min: 5400 },
-  { k: 'segredo', narr: 'Mas Augusto guardava um segredo. Na segunda-feira, às nove da manhã, ele seria testemunha numa investigação federal.', min: 5200 },
-  { k: 'suspeitos', narr: 'Seis pessoas estavam na casa. Todas tinham um motivo. Todas mentiram.', min: 5600 },
-  { k: 'titulo', narr: 'Dois agentes. Dois celulares. Um assassino. Último Lance.', min: 4200 },
-];
+const SCENES = INTRO;
 
 function TypeText({ text, speed = 55 }) {
   const [n, setN] = useState(0);
@@ -49,13 +42,14 @@ export default function Intro({ onDone }) {
 
   async function start() {
     A.unlockAudio();
+    A.preload(SCENES.map(sc => sc.id));
     setStarted(true);
     stopDrone.current = A.drone();
     for (let n = 0; n < SCENES.length; n++) {
       if (skip.current) return;
       setI(n);
       sfx(SCENES[n].k);
-      await Promise.all([A.speak(SCENES[n].narr), wait(SCENES[n].min)]);
+      await Promise.all([A.playClip(SCENES[n].id, SCENES[n].texto), wait(SCENES[n].min)]);
     }
     stopDrone.current();
     setEnded(true);
@@ -122,7 +116,7 @@ export default function Intro({ onDone }) {
           <div className="sc-titulo"><div className="eyebrow">Um caso para dois celulares</div><h1 className="logo">ÚLTIMO<br />LANCE</h1><div className="mono">O CASO VALADARES</div></div>
         )}
       </div>
-      <div className="subtitle">{sc.narr}</div>
+      <div className="subtitle">{sc.texto}</div>
       <div className="intro-actions">
         {ended
           ? <button className="btn primary" onClick={finish}>Começar a investigação</button>

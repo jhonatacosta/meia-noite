@@ -49,7 +49,7 @@ export default function Game() {
     if (d.respostas.map(norm).includes(norm(txt))) {
       A.success();
       set(s => ({ found: s.found.includes(d.id) ? s.found : [...s.found, d.id] }));
-      setNewsQ(q => [...q, { news: d.news, titulo: d.titulo, libera: d.libera ? d.libera[st.role] : null }]);
+      setNewsQ(q => [...q, { clip: 'news-' + d.id, news: d.news, titulo: d.titulo, libera: d.libera ? d.libera[st.role] : null }]);
       return true;
     }
     A.errorBuzz();
@@ -183,9 +183,8 @@ function Final({ st, set, setNewsQ }) {
     if (P.some(q => !ans[q.k])) { setErr('Respondam as quatro perguntas.'); A.errorBuzz(); return; }
     const certo = ans.autor === 'livia';
     set({ final: ans });
-    setNewsQ(q => [...q, certo
-      ? { titulo: 'Caso encerrado', news: { kicker: 'CASO ENCERRADO', manchete: 'Leiloeira é presa a quatro horas do voo para Lisboa', sub: 'Lívia Moretti, a “Perita” do esquema de contrabando, é indiciada pelo envenenamento de Augusto Valadares.' } }
-      : { titulo: 'Caso encerrado', news: { kicker: 'ERRO HISTÓRICO', manchete: 'Polícia prende a pessoa errada', sub: 'Enquanto isso, a verdadeira culpada pega um táxi para o aeroporto.' } }]);
+    const n = certo ? C.FINAL.noticias.certo : C.FINAL.noticias.errado;
+    setNewsQ(q => [...q, { ...n, clip: 'news-' + n.id }]);
   };
   return (
     <div className="act final">

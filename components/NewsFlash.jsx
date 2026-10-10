@@ -1,16 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
 import * as A from '@/lib/audio';
+import { textoNoticia } from '@/lib/narracao';
 
 // Plantão: flash vermelho → jornal girando → página de jornal + tarja de TV ao vivo + narração.
 export default function NewsFlash({ item, onClose }) {
   const [phase, setPhase] = useState('flash');
-  const { news, libera, titulo } = item;
+  const { news, libera, titulo, clip } = item;
 
-  const narrar = () => A.speak(`Plantão do Diário do Litoral. ${news.manchete}. ${news.sub}`, { rate: 1.05, pitch: 1 });
+  const narrar = () => A.playClip(clip, textoNoticia(news));
 
   useEffect(() => {
     A.newsSting();
+    A.preload([clip]);
     const t1 = setTimeout(() => { setPhase('spin'); A.whoosh(); }, 750);
     const t2 = setTimeout(() => { setPhase('read'); narrar(); }, 2300);
     return () => { clearTimeout(t1); clearTimeout(t2); A.stopSpeech(); };

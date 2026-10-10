@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "audio": "node scripts/gerar-audio.mjs"
   },
   "dependencies": {
     "next": "^15.5.27",

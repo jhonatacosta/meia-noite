@@ -35,7 +35,9 @@ Abra http://localhost:3000. Para testar no celular na mesma rede Wi-Fi, use o IP
 ## Estrutura
 
 - `lib/caso.js` — todo o conteúdo do caso: suspeitos, depoimentos, provas, objetivos e manchetes. Para criar outro caso, edite este arquivo.
-- `lib/audio.js` — trilha e efeitos sintetizados (WebAudio) e narração com a voz do celular (speechSynthesis).
+- `lib/audio.js` — trilha e efeitos sintetizados (WebAudio) e reprodução da narração gravada.
+- `lib/narracao.js` + `public/audio/` — textos e MP3 da narração em português do Brasil (vozes neurais Piper: Faber na abertura, Cadu nos plantões). Funciona em qualquer celular, mesmo sem voz em português instalada.
+- `scripts/gerar-audio.mjs` — regrava os MP3 quando você muda algum texto (`npm run audio`; instruções no topo do arquivo).
 - `components/Intro.jsx` — abertura em motion design.
 - `components/NewsFlash.jsx` — plantão de jornal: flash, jornal girando, tarja de TV ao vivo e narração.
 - `components/Game.jsx` e `components/Panels.jsx` — o jogo.
